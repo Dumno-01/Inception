@@ -1,34 +1,32 @@
-#!/bin/sh
+#!/bin/bash
 
-# Logging environment variables for debugging
-echo "SQL_ROOT_PASSWORD=${SQL_ROOT_PASSWORD}"
-echo "SQL_DATABASE=${SQL_DATABASE}"
-echo "SQL_USER=${SQL_USER}"
-echo "SQL_PASSWORD=${SQL_PASSWORD}"
+# Ensure permissions for MySQL directories
+chgrp -R mysql /var/lib/mysql
+chmod -R g+rwx /var/lib/mysql
 
-# Check if the data directory is empty
-if [ ! -d "/var/lib/mysql/mysql" ]; then
-    echo "Initializing MariaDB data directory..."
-    mysql_install_db --user=mysql --datadir=/var/lib/mysql
+if [ -d "/var/lib/mysql/${SQL_DATABASE}" ]; then
+    echo "Mariadb already initialized"
+else
+    # Initialize database if not already initialized
+    if [ ! -d "/var/lib/mysql/mysql" ]; then
+        mysql_install_db --user=mysql --ldata=/var/lib/mysql
+    fi
 
-    echo "Starting MariaDB with --skip-grant-tables for initialization..."
-    mysqld_safe --skip-grant-tables &
-    sleep 5
+    /etc/init.d/mariadb start
 
-    echo "Setting up database and users..."
-    # Use non-password commands initially
-    mysql -u root <<EOF
-FLUSH PRIVILEGES;
+    mariadb << XEOFX
+DELETE FROM mysql.user WHERE User='';
+DELETE FROM mysql.user WHERE User='root' AND Host NOT IN ('localhost', '127.0.0.1', '::1');
+DROP DATABASE IF EXISTS test;
+DELETE FROM mysql.db WHERE Db='test' OR Db='test\\_%';
+CREATE DATABASE IF NOT EXISTS ${SQL_DATABASE};
+CREATE USER IF NOT EXISTS '${SQL_USER}'@'%' IDENTIFIED BY '${SQL_PASSWORD}';
+GRANT ALL PRIVILEGES ON ${SQL_DATABASE}.* TO '${SQL_USER}'@'%';
 ALTER USER 'root'@'localhost' IDENTIFIED BY '${SQL_ROOT_PASSWORD}';
-CREATE DATABASE IF NOT EXISTS \`${SQL_DATABASE}\`;
-CREATE USER IF NOT EXISTS \`${SQL_USER}\`@'%' IDENTIFIED BY '${SQL_PASSWORD}';
-GRANT ALL PRIVILEGES ON \`${SQL_DATABASE}\`.* TO \`${SQL_USER}\`@'%';
 FLUSH PRIVILEGES;
-EOF
+XEOFX
 
-    echo "Stopping MariaDB after initialization..."
-    mysqladmin -u root -p"${SQL_ROOT_PASSWORD}" shutdown
+    /etc/init.d/mariadb stop
 fi
 
-echo "Starting MariaDB in normal mode..."
 exec "$@"

@@ -1,28 +1,29 @@
-#!/bin/sh
-set -e  # Exit immediately on error
+#!/bin/bash
 
-echo "Starting WordPress configuration script..."
-sleep 10
+cd /var/www/html
 
-if [ ! -f /var/www/wordpress/wp-config.php ]; then
-    echo "wp-config.php not found. Creating wp-config.php with the provided database settings."
-
-    wp config create --allow-root \
-                     --dbname=$SQL_DATABASE \
-                     --dbuser=$SQL_USER \
-                     --dbpass=$SQL_PASSWORD \
-                     --dbhost=mariadb \
-                     --path='/var/www/wordpress'
-
-    if [ -f /var/www/wordpress/wp-config.php ]; then
-        echo "wp-config.php successfully created."
-    else
-        echo "Error: wp-config.php was not created. Check WP-CLI output."
-    fi
+if [ -f "wp-config.php" ]; then
+    echo "WordPress already initialized"
 else
-    echo "wp-config.php already exists. Skipping WordPress configuration."
-fi
+    curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
+    chmod +x wp-cli.phar
 
-echo "Starting PHP-FPM..."
+    # Download WordPress and set up configuration
+    ./wp-cli.phar core download --locale=en_GB --allow-root
+    ./wp-cli.phar config create --allow-root \
+        --dbname="${WORDPRESS_DB_NAME}" \
+        --dbuser="${WORDPRESS_DB_USER}" \
+        --dbpass="${WORDPRESS_DB_PASSWORD}" \
+        --dbhost="${WORDPRESS_DB_HOST}"
+
+    ./wp-cli.phar core install --allow-root \
+        --url="https://${NGINX_HOST}" \
+        --title="${COMPOSE_PROJECT_NAME}" \
+        --admin_user="${WORDPRESS_ADMIN}" \
+        --admin_password="${WORDPRESS_ADMIN}" \
+        --admin_email="${WORDPRESS_ADMIN_MAIL}"
+
+    chown -R www-data:www-data /var/www/html/wp-content/
+fi
 
 exec "$@"
