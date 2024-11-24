@@ -8,7 +8,8 @@ RUN apt-get install -y --no-install-recommends \
         php-cli \
         php-mysql \
         php-fpm \
-        curl
+        curl\
+        msmtp
 
 RUN mkdir /run/php/
 RUN chown -R www-data:www-data /run/php/
