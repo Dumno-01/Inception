@@ -30,8 +30,7 @@ services:
       SQL_PASSWORD:
     volumes:
       - .env:/etc/environment
-      - ./mysql-data:/var/lib/mysql
-      - ./mysqld-socket:/run/mysqld
+      - mariadb:/var/lib/mysql
     restart: unless-stopped
   
   wordpress:
@@ -56,14 +55,14 @@ volumes:
     driver_opts:
       type: 'none'
       o: 'bind'
-      device: '/home/ffreze/Inception/srcs/wordpress'
+      device: '/home/ffreze/data/wordpress'
   
   mariadb:
     driver: local
     driver_opts:
       type: 'none'
       o: 'bind'
-      device: '/home/ffreze/Inception/srcs/mariadb'
+      device: '/home/ffreze/data/mariadb'
 
 networks:
   inception:
