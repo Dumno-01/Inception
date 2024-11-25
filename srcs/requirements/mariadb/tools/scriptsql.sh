@@ -11,11 +11,11 @@ else
     if [ ! -d "/var/lib/mysql/mysql" ]; then
         mysql_install_db --user=mysql --ldata=/var/lib/mysql
     fi
+        /etc/init.d/mariadb start
 
-    /etc/init.d/mariadb start
+sleep 5
 
-
-mariadb << XEOFX
+mariadb << EOF
 DELETE FROM mysql.user WHERE User='';
 DELETE FROM mysql.user WHERE User='root' AND Host NOT IN ('localhost', '127.0.0.1', '::1');
 DROP DATABASE IF EXISTS test;
@@ -25,7 +25,7 @@ CREATE USER IF NOT EXISTS $SQL_USER@'localhost' IDENTIFIED BY '$SQL_PASSWORD';
 GRANT ALL PRIVILEGES ON $SQL_DATABASE.* TO $SQL_USER@'%' IDENTIFIED BY '$SQL_PASSWORD';
 SET PASSWORD FOR 'root'@'localhost' = PASSWORD('$SQL_ROOT_PASSWORD');
 FLUSH PRIVILEGES;
-XEOFX
+EOF
 
     /etc/init.d/mariadb stop
 fi

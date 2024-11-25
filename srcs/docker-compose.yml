@@ -29,8 +29,9 @@ services:
       SQL_USER:
       SQL_PASSWORD:
     volumes:
-      - mariadb:/var/lib/mysql
-      - .env:/etc/environment 
+      - .env:/etc/environment
+      - ./mysql-data:/var/lib/mysql
+      - ./mysqld-socket:/run/mysqld
     restart: unless-stopped
   
   wordpress:

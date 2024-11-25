@@ -1,5 +1,7 @@
 #!/bin/bash
 
+sleep 15
+
 cd /var/www/html
 
 if [ -f "wp-config.php" ]; then
@@ -11,17 +13,17 @@ else
     # Download WordPress and set up configuration
     ./wp-cli.phar core download --locale=en_GB --allow-root
     ./wp-cli.phar config create --allow-root \
-        --dbname="${WORDPRESS_DB_NAME}" \
-        --dbuser="${WORDPRESS_DB_USER}" \
-        --dbpass="${WORDPRESS_DB_PASSWORD}" \
-        --dbhost="${WORDPRESS_DB_HOST}"
+        --dbname=$WORDPRESS_DB_NAME \
+        --dbuser=$WORDPRESS_DB_USER \
+        --dbpass=$WORDPRESS_DB_PASSWORD \
+        --dbhost=$WORDPRESS_DB_HOST
 
     ./wp-cli.phar core install --allow-root \
-        --url="https://${NGINX_HOST}" \
-        --title="${COMPOSE_PROJECT_NAME}" \
-        --admin_user="${WORDPRESS_ADMIN}" \
-        --admin_password="${WORDPRESS_ADMIN}" \
-        --admin_email="${WORDPRESS_ADMIN_MAIL}"
+        --url=https://$NGINX_HOST \
+        --title=$COMPOSE_PROJECT_NAME \
+        --admin_user=$WORDPRESS_ADMIN \
+        --admin_password=$WORDPRESS_ADMIN \
+        --admin_email=$WORDPRESS_ADMIN_MAIL
 
     chown -R www-data:www-data /var/www/html/wp-content/
 fi

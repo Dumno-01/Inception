@@ -13,7 +13,8 @@ clean:
 	docker compose -f $(COMPOSE_FILE) down --volumes --remove-orphans
 	@echo "Removing all unused Docker resources..."
 	docker system prune --all --volumes --force
-	rm -rf ./srcs/mariadb/*
+	rm -rf ./srcs/mysql-data/*
+	rm -rf ./srcs/mysqld-socket/*
 	rm -rf ./srcs/wordpress/*
 	@echo "Clean-up complete!"
 
