@@ -1,13 +1,11 @@
 #!/bin/bash
 
-# Ensure permissions for MySQL directories
 chgrp -R mysql /var/lib/mysql
 chmod -R g+rwx /var/lib/mysql
 
 if [ -d "/var/lib/mysql/${SQL_DATABASE}" ]; then
     echo "Mariadb already initialized"
 else
-    # Initialize database if not already initialized
     if [ ! -d "/var/lib/mysql/mysql" ]; then
         mysql_install_db --user=mysql --ldata=/var/lib/mysql
     fi
