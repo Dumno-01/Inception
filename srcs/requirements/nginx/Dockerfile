@@ -4,9 +4,7 @@ RUN apt upgrade -y
 RUN apt install -y \
     nginx \
     vim   \
-    curl \
-    sendmail \
-    sendmail-bin
+    curl 
 RUN mkdir -p /etc/nginx/ssl
 RUN apt install openssl -y
 RUN openssl req -x509 -nodes \
