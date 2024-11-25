@@ -1,6 +1,8 @@
 COMPOSE_FILE = srcs/docker-compose.yml
 
 all:
+	mkdir ./srcs/mysql-data
+	mkdir ./srcs/mysqld-socket
 	chmod 777 ./srcs/mysql-data
 	chmod 777 ./srcs/mysqld-socket
 	chown -R 999:999 ./srcs/mysql-data
